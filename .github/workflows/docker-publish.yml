@@ -27,4 +27,5 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/${{ github.repository }}:latest
+          # Itt kézzel beírjuk csupa KISBETŰVEL a nevet
+          tags: ghcr.io/riptir3/steampricecheckerconsoleapp:latest
