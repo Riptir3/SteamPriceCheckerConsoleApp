@@ -7,7 +7,7 @@ namespace SteamPriceCheckerConsoleApp
 {
     internal class Program
     {
-        private static string AppVersion = "v1.0.0";
+        private static string AppVersion = "v1.2.0";
         private readonly static HttpClient _httpClient = new HttpClient();
 
         static async Task Main(string[] args)
