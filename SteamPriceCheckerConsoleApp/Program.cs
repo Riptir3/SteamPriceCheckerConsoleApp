@@ -15,8 +15,6 @@ namespace SteamPriceCheckerConsoleApp
             _httpClient.DefaultRequestHeaders.Add("User-Agent", "SteamPriceChecker-App");
 
             Console.WriteLine($"--- Steam Adatlekérő {AppVersion} ---");
-
-            Console.WriteLine(DateTime.Now);
             await CheckForUpdates();
 
             string appId = "2807960";
