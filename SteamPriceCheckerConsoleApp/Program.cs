@@ -7,7 +7,7 @@ namespace SteamPriceCheckerConsoleApp
 {
     internal class Program
     {
-        private static string AppVersion = "v1.3.0";
+        private static string AppVersion = "v1.3.1";
         private readonly static HttpClient _httpClient = new HttpClient();
 
         static async Task Main(string[] args)
@@ -16,6 +16,7 @@ namespace SteamPriceCheckerConsoleApp
 
             Console.WriteLine($"--- Steam Adatlekérő {AppVersion} ---");
 
+            Console.WriteLine(DateTime.Now);
             await CheckForUpdates();
 
             string appId = "2807960";
@@ -27,7 +28,6 @@ namespace SteamPriceCheckerConsoleApp
 
         static async Task CheckForUpdates()
         {
-            Console.WriteLine(DateTime.Now);
             try
             {
                 Console.WriteLine("Frissítések keresése.....");
