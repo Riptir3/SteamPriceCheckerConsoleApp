@@ -1,5 +1,5 @@
 ﻿services:
-  steam-checker:
+  steam-app:
     image: ghcr.io/riptir3/steampricecheckerconsoleapp:latest
     container_name: steam-app
     restart: always
@@ -9,4 +9,6 @@
     container_name: watchtower
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    command: --interval 60 --cleanup --run-once steam-app
+    environment:
+      - DOCKER_API_VERSION=1.44 
+    command: --interval 60 --cleanup steam-app

@@ -7,7 +7,7 @@ namespace SteamPriceCheckerConsoleApp
 {
     internal class Program
     {
-        private static string AppVersion = "v1.3.1";
+        private static string AppVersion = "v1.3.2";
         private readonly static HttpClient _httpClient = new HttpClient();
 
         static async Task Main(string[] args)
@@ -33,7 +33,6 @@ namespace SteamPriceCheckerConsoleApp
                 Console.WriteLine("Frissítések keresése.....");
 
                 string url = "https://api.github.com/repos/Riptir3/SteamPriceCheckerConsoleApp/releases/latest";
-
                 var response = await _httpClient.GetStringAsync(url);
                 using JsonDocument doc = JsonDocument.Parse(response);
 
@@ -43,7 +42,23 @@ namespace SteamPriceCheckerConsoleApp
                 {
                     Console.WriteLine("--------------------------------------------------");
                     Console.WriteLine($"[!] ÚJ VERZIÓ ELÉRHETŐ: {latestVersion}");
-                    Console.WriteLine("[!] A Watchtower hamarosan frissíti a konténert.");
+
+                    bool isDocker = Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true";
+
+                    if (isDocker)
+                    {
+                        Console.WriteLine("[!] A Watchtower hamarosan frissíti a konténert.");
+                    }
+                    else
+                    {
+                        var assets = doc.RootElement.GetProperty("assets");
+                        if (assets.GetArrayLength() > 0)
+                        {
+                            string downloadUrl = assets[0].GetProperty("browser_download_url").GetString()!;
+                            Console.WriteLine("[!] Automatikus frissítés indítása...");
+                            await DownloadAndInstallUpdate(downloadUrl);
+                        }
+                    }
                     Console.WriteLine("--------------------------------------------------\n");
                 }
                 else
@@ -53,7 +68,7 @@ namespace SteamPriceCheckerConsoleApp
             }
             catch
             {
-                Console.WriteLine("Frissítés-ellenőrzés átugorva (nincs publikált Release).\n");
+                Console.WriteLine("Frissítés-ellenőrzés átugorva.\n");
             }
         }
 
@@ -96,6 +111,29 @@ namespace SteamPriceCheckerConsoleApp
             {
                 Console.WriteLine($"Hiba történt a Steam lekérésnél: {ex.Message}");
             }
+        }
+
+        static async Task DownloadAndInstallUpdate(string downloadUrl)
+        {
+            Console.WriteLine("Frissítés letöltése...");
+            string currentPath = Environment.ProcessPath!;
+            string tempPath = currentPath + ".new";
+
+            var fileBytes = await _httpClient.GetByteArrayAsync(downloadUrl);
+            await File.WriteAllBytesAsync(tempPath, fileBytes);
+
+            Console.WriteLine("Új verzió letöltve. Újraindítás...");
+            string cmd = $"Start-Sleep -s 2; Move-Item -Path '{tempPath}' -Destination '{currentPath}' -Force; Start-Process '{currentPath}'";
+
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = "powershell",
+                Arguments = $"-NoProfile -Command \"{cmd}\"",
+                CreateNoWindow = true,
+                UseShellExecute = false
+            });
+
+            Environment.Exit(0);
         }
     }
 }
