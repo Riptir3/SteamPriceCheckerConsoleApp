@@ -48,10 +48,10 @@ jobs:
       - name: Publish EXE
         shell: pwsh
         run: |
-          # Ha tag-ről van szó (v1.4.0), levágjuk a 'v' betűt. Ha csak push, akkor 0.0.1
-          $RAW_VERSION = "${{ github.ref_name }}"
-          $CLEAN_VERSION = if ("${{ github.ref_type }}" -eq "tag") { $RAW_VERSION.TrimStart('v') } else { "0.0.1" }
+          # Verzió kiszámítása
+          $CLEAN_VERSION = if ("${{ github.ref_type }}" -eq "tag") { "${{ github.ref_name }}".TrimStart('v') } else { "0.0.1" }
           
+          # Publish futtatása - FIGYELJ AZ ÚTVONALRA!
           dotnet publish ./SteamPriceCheckerConsoleApp/SteamPriceCheckerConsoleApp.csproj `
             -c Release `
             -r win-x64 `
@@ -59,18 +59,20 @@ jobs:
             -p:PublishSingleFile=true `
             -p:Version=$CLEAN_VERSION `
             -o ./publish
+          
+          # ELLENŐRZÉS: Kiírjuk a mappa tartalmát, hogy lássuk a logban, ott van-e az EXE
+          Write-Host "Mappa tartalma a publish után:"
+          Get-ChildItem ./publish
 
       - name: Create or Update Release
         uses: softprops/action-gh-release@v1
         with:
-          files: ./publish_output/SteamPriceCheckerConsoleApp.exe
-          # Ezt írd át: Ne 'latest', hanem a Push-olt Tag neve legyen
-          tag_name: ${{ github.ref_name }} 
+          # Pontosan ugyanazt a mappát használjuk, amit fent megadtunk (-o ./publish)
+          files: publish/SteamPriceCheckerConsoleApp.exe
+          tag_name: ${{ github.ref_name }}
           name: "Verzió ${{ github.ref_name }}"
-          body: "Automatikusan generált frissítés a(z) ${{ github.ref_name }} verzióhoz."
+          body: "Automatikusan generált frissítés. SHA: ${{ github.sha }}"
           draft: false
           prerelease: false
-          # Ez a sor fontos: ha már létezik a Tag, írja felül a fájlt
-          overwrite: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
