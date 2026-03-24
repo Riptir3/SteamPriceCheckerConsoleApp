@@ -23,7 +23,7 @@ namespace SteamPriceCheckerConsoleApp
 
             try
             {
-                Console.WriteLine("Adatok lekérése a Steamről....");
+                Console.WriteLine("Adatok lekérése a Steamről......");
                 var response = await _httpClient.GetStringAsync(url);
 
                 using JsonDocument doc = JsonDocument.Parse(response);
