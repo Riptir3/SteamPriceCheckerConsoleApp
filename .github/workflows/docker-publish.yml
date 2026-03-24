@@ -25,7 +25,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
-          context: .
+          context: ./SteamPriceCheckerConsoleApp 
+          file: ./SteamPriceCheckerConsoleApp/Dockerfile
           push: true
-          # Itt kézzel beírjuk csupa KISBETŰVEL a nevet
           tags: ghcr.io/riptir3/steampricecheckerconsoleapp:latest
