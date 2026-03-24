@@ -2,7 +2,8 @@ name: Docker Build
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "**" ] 
+  workflow_dispatch:     
 
 jobs:
   build:
@@ -24,6 +25,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
-          context: .
+          context: ./SteamPriceCheckerConsoleApp 
+          file: ./SteamPriceCheckerConsoleApp/Dockerfile
           push: true
-          tags: ghcr.io/${{ github.repository }}:latest
+          tags: ghcr.io/riptir3/steampricecheckerconsoleapp:latest
