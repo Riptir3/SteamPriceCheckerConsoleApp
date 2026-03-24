@@ -46,7 +46,19 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Publish EXE
-        run: dotnet publish ./SteamPriceCheckerConsoleApp/SteamPriceCheckerConsoleApp.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o ./publish
+        shell: pwsh
+        run: |
+          # Ha tag-ről van szó (v1.4.0), levágjuk a 'v' betűt. Ha csak push, akkor 0.0.1
+          $RAW_VERSION = "${{ github.ref_name }}"
+          $CLEAN_VERSION = if ("${{ github.ref_type }}" -eq "tag") { $RAW_VERSION.TrimStart('v') } else { "0.0.1" }
+          
+          dotnet publish ./SteamPriceCheckerConsoleApp/SteamPriceCheckerConsoleApp.csproj `
+            -c Release `
+            -r win-x64 `
+            --self-contained true `
+            -p:PublishSingleFile=true `
+            -p:Version=$CLEAN_VERSION `
+            -o ./publish
 
       - name: Create or Update Release
         uses: softprops/action-gh-release@v1
@@ -55,7 +67,7 @@ jobs:
           files: ./publish/SteamPriceCheckerConsoleApp.exe
           tag_name: latest 
           name: "Legfrissebb verzió (Automata Build)"
-          body: "Ez a release automatikusan frissül minden commit után."
+          body: "Ez a release automatikusan frissül minden commit után. Aktuális verzió: ${{ github.ref_name }}"
           draft: false
           prerelease: false
         env:
