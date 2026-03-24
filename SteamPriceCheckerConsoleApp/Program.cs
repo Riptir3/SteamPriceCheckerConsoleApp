@@ -7,7 +7,7 @@ namespace SteamPriceCheckerConsoleApp
 {
     internal class Program
     {
-        private static string AppVersion = "v1.2.0";
+        private static string AppVersion = "v1.1.0";
         private readonly static HttpClient _httpClient = new HttpClient();
 
         static async Task Main(string[] args)
@@ -22,7 +22,7 @@ namespace SteamPriceCheckerConsoleApp
             await GetSteamGameDetails(appId);
 
             Console.WriteLine("\nNyomj meg egy gombot a kilépéshez...");
-            Console.ReadKey();
+            await Task.Delay(-1);
         }
 
         static async Task CheckForUpdates()
@@ -81,7 +81,7 @@ namespace SteamPriceCheckerConsoleApp
 
                     string description = data.GetProperty("short_description").GetString()!;
 
-                    Console.WriteLine("\n--- Játék adatai ---");
+                    Console.WriteLine("\n---- Játék adatai ----");
                     Console.WriteLine($"Név: {name}");
                     Console.WriteLine($"Ár:  {price}");
                     Console.WriteLine($"Leírás: {(description.Length > 100 ? description.Substring(0, 100) + "..." : description)}");
