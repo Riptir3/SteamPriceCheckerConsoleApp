@@ -1,5 +1,7 @@
-﻿
+﻿using System;
+using System.Net.Http;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace SteamPriceCheckerConsoleApp
 {
@@ -7,14 +9,51 @@ namespace SteamPriceCheckerConsoleApp
     {
         private static string AppVersion = "v1.0.0";
         private readonly static HttpClient _httpClient = new HttpClient();
+
         static async Task Main(string[] args)
         {
+            _httpClient.DefaultRequestHeaders.Add("User-Agent", "SteamPriceChecker-App");
+
             Console.WriteLine($"--- Steam Adatlekérő {AppVersion} ---");
+
+            await CheckForUpdates();
+
             string appId = "2807960";
             await GetSteamGameDetails(appId);
 
             Console.WriteLine("\nNyomj meg egy gombot a kilépéshez...");
             Console.ReadKey();
+        }
+
+        static async Task CheckForUpdates()
+        {
+            try
+            {
+                Console.WriteLine("Frissítések keresése...");
+
+                string url = "https://api.github.com/repos/Riptir3/SteamPriceCheckerConsoleApp/releases/latest";
+
+                var response = await _httpClient.GetStringAsync(url);
+                using JsonDocument doc = JsonDocument.Parse(response);
+
+                string latestVersion = doc.RootElement.GetProperty("tag_name").GetString()!;
+
+                if (latestVersion != AppVersion)
+                {
+                    Console.WriteLine("--------------------------------------------------");
+                    Console.WriteLine($"[!] ÚJ VERZIÓ ELÉRHETŐ: {latestVersion}");
+                    Console.WriteLine("[!] A Watchtower hamarosan frissíti a konténert.");
+                    Console.WriteLine("--------------------------------------------------\n");
+                }
+                else
+                {
+                    Console.WriteLine("[OK] Az alkalmazás naprakész.\n");
+                }
+            }
+            catch
+            {
+                Console.WriteLine("Frissítés-ellenőrzés átugorva (nincs publikált Release).\n");
+            }
         }
 
         static async Task GetSteamGameDetails(string appId)
@@ -54,7 +93,7 @@ namespace SteamPriceCheckerConsoleApp
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Hiba történt: {ex.Message}");
+                Console.WriteLine($"Hiba történt a Steam lekérésnél: {ex.Message}");
             }
         }
     }
